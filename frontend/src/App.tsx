@@ -1,11 +1,24 @@
-import './App.css'
-import { useState, useEffect } from 'react';
+import React from 'react';
+import './App.css';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 
+interface Bookmark {
+  title: string;
+  url: string;
+  remember_date: string;
+}
+
+interface FormState {
+  title: string;
+  url: string;
+  remember_date: string;
+}
+
 function App() {
-  const [bookmarks, setBookmarks] = useState([]);
-  const [form, setForm] = useState({
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [form, setForm] = useState<FormState>({
     title: '',
     url: '',
     remember_date: ''
@@ -16,23 +29,23 @@ function App() {
   }, []);
 
   const fetchBookmarks = async () => {
-    const res = await axios.get('http://localhost:5000/bookmarks');
-    const sorted = res.data.sort((a, b) => new Date(a.remember_date) - new Date(b.remember_date));
+    const res = await axios.get<Bookmark[]>('http://localhost:5000/bookmarks');
+    const sorted = res.data.sort((a, b) => new Date(a.remember_date).getTime() - new Date(b.remember_date).getTime());
     setBookmarks(sorted);
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     await axios.post('http://localhost:5000/bookmarks', form);
     setForm({ title: '', url: '', remember_date: '' });
     fetchBookmarks();
   };
 
-  const isToday = (dateStr) => {
+  const isToday = (dateStr: string) => {
     const today = format(new Date(), 'yyyy-MM-dd');
     return today === dateStr;
   };
@@ -60,14 +73,16 @@ function App() {
           className="border p-2 w-full"
           required
         />
+      <label className="block">
+        Remember Date
         <input
-          type="date"
-          name="remember_date"
-          value={form.remember_date}
-          onChange={handleChange}
           className="border p-2 w-full"
+          name="remember_date"
+          placeholder="Date"   
           required
+          type="date"
         />
+      </label>
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
           Add Bookmark
         </button>

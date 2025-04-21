@@ -4,9 +4,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 app = Flask(__name__)
-CORS(app)  # Libera CORS para acessar via frontend React
+CORS(app)  
 
-# Banco de dados em memória
 bookmarks = []
 
 @app.route('/bookmarks', methods=['GET'])
@@ -20,7 +19,6 @@ def add_bookmark():
     if not all(key in data for key in ("title", "url", "remember_date")):
         return jsonify({"error": "Missing fields"}), 400
 
-    # Opcional: validar formato da data
     try:
         datetime.strptime(data['remember_date'], '%Y-%m-%d')
     except ValueError:
